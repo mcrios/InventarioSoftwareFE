@@ -47,7 +47,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               </div>
               <div className="flex flex-col">
                 <span className="font-headline-sm text-headline-sm leading-none tracking-tight text-on-surface">
-                  CoreInventory
+                  Core Inventory
                 </span>
                 <span className="mt-0.5 font-label-mono-xs text-label-mono-xs text-secondary">
                   Version 0.1

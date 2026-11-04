@@ -8,6 +8,7 @@ import { SsoButtons } from "@/components/auth/SsoButtons";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { authService } from "@/lib/authService";
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,15 +27,30 @@ export function LoginForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
 
     setLoading(true);
-    window.setTimeout(() => {
-      router.push("/dashboard");
-    }, 700);
+
+    authService.login({ email, password })
+      .then((response) => {
+        if (response.success) {
+          // Redirigir al dashboard después de un breve retraso para mostrar el mensaje de éxito
+          router.push("/dashboard");
+        } else {
+          setError(response.message || "Error desconocido al iniciar sesión.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error during login:", err);
+        setError("Ocurrió un error al intentar iniciar sesión.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
   }
 
   return (
