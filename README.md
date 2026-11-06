@@ -31,6 +31,7 @@ caracteres (el flujo de autenticación es simulado).
 - `npm run build` — build de producción
 - `npm start` — servidor de producción
 - `npm run lint` — linter
+- `npm run generate:api-types` — regenera `src/types/api.generated.ts` desde el OpenAPI del backend (requiere el backend corriendo en `localhost:8080`)
 
 ## Estructura
 

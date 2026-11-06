@@ -66,11 +66,6 @@ class HttpClient {
       headers: requestHeaders,
     });
 
-    if (!response.ok) {
-      // Manejo estandarizado de errores HTTP si lo deseas
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     // Aquí parseamos directamente asumiendo que el backend siempre responde con la estructura ApiResponse<T>
     const json: ApiResponse<T> = await response.json();
     return json;

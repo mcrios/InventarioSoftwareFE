@@ -6,7 +6,8 @@ export type BadgeTone =
   | "success"
   | "warning"
   | "danger"
-  | "maintenance";
+  | "maintenance"
+  | "dark";
 
 const toneClasses: Record<BadgeTone, string> = {
   neutral: "bg-surface-container text-on-surface",
@@ -14,6 +15,7 @@ const toneClasses: Record<BadgeTone, string> = {
   warning: "bg-secondary-container text-on-secondary-container",
   danger: "bg-error text-on-error shadow-sm",
   maintenance: "bg-secondary-container text-on-secondary-container",
+  dark: "bg-dark text-on-dark",
 };
 
 interface BadgeProps {

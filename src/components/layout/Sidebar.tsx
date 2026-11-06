@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { navigation } from "@/lib/navigation";
-import { currentUser } from "@/lib/users";
+import { currentUser } from "@/lib/userService";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {

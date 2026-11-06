@@ -35,8 +35,12 @@
   --color-on-primary-fixed-variant: #832700;
   --color-surface-tint: #ab3500;
 
-  --color-secondary: #5f5e5e;
+  --color-secondary: #232C38;
   --color-secondary-container: #e5e2e1;
+
+  --color-dark: #232C38;
+  --color-dark-hover: #2e3946;
+  --color-on-dark: #ffffff;
   --color-on-secondary: #ffffff;
   --color-on-secondary-container: #656464;
   --color-secondary-fixed: #e5e2e1;

@@ -9,7 +9,7 @@ const publicRoutes = [
   // Agrega aquí cualquier otra ruta pública, ej: '/contacto', '/sobre-nosotros'
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 2. Verificamos si la ruta actual está en la lista de rutas públicas

@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { buttonStyles } from "@/components/ui/Button";
+import { UserMenu } from "@/components/layout/UserMenu";
 import { Icon } from "@/components/ui/Icon";
 import { fleetSummary } from "@/lib/inventory";
-import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -39,41 +38,20 @@ export function Header({ onOpenSidebar }: HeaderProps) {
         <div className="hidden items-center gap-1.5 rounded-full bg-surface-container px-space-sm py-1 md:flex">
           <span className="h-2 w-2 rounded-full bg-primary-container" />
           <span className="font-label-mono-xs text-label-mono-xs text-on-surface">
-            {fleetSummary.region}
+            EMPRESA: {fleetSummary.region}
           </span>
         </div>
 
         <Link
-          href="/alerts"
-          aria-label="Ver alertas"
+          href="/notifications"
+          aria-label="Ver notificaciones"
           className="relative rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
         >
           <Icon name="notifications" className="text-[20px]" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary-container ring-2 ring-surface" />
         </Link>
 
-        <Link
-          href="/inventory/new"
-          className={cn(
-            buttonStyles("primary", "md"),
-            "hidden sm:inline-flex",
-          )}
-        >
-          <Icon name="add" className="text-[16px]" />
-          <span>Registrar Activo</span>
-        </Link>
-
-        <Link
-          href="/settings"
-          aria-label="Perfil de usuario"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-primary"
-        >
-          <Icon
-            name="person"
-            className="text-[18px] text-on-primary"
-            filled
-          />
-        </Link>
+        <UserMenu />
       </div>
     </header>
   );

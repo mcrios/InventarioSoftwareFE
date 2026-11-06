@@ -22,35 +22,37 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: "Administración",
+    items: [
+      { label: "Empresas", href: "/company", icon: "corporate_fare" },
+      { label: "Usuarios", href: "/users", icon: "group" },
+      { label: "Configuración", href: "/settings", icon: "settings" },
+    ],
+  },
+  {
     label: "Operaciones",
     items: [
-      {
-        label: "Software y Parches",
-        href: "/software",
-        icon: "system_update_alt",
-      },
-      {
-        label: "Aprobaciones",
-        href: "/approvals",
-        icon: "verified_user",
-      },
       {
         label: "Gestión de Licencias",
         href: "/licenses",
         icon: "key",
       },
       {
-        label: "Alertas",
-        href: "/alerts",
+        label: "Software y Parches",
+        href: "/software",
+        icon: "system_update_alt",
+      },
+      {
+        label: "Aprobar Actualizaciones",
+        href: "/approvals",
+        icon: "verified_user",
+      },
+      {
+        label: "Notificaciones",
+        href: "/notifications",
         icon: "notifications_active",
       },
     ],
   },
-  {
-    label: "Administración",
-    items: [
-      { label: "Usuarios", href: "/users", icon: "group" },
-      { label: "Configuración", href: "/settings", icon: "settings" },
-    ],
-  },
+  
 ];

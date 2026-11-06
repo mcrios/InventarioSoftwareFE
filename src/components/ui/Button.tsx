@@ -7,6 +7,7 @@ export type ButtonVariant =
   | "outline"
   | "ghost"
   | "danger"
+  | "dark"
   | "link";
 
 export type ButtonSize = "sm" | "md" | "icon";
@@ -21,6 +22,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   ghost:
     "text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
   danger: "bg-error text-on-error hover:opacity-95 shadow-sm",
+  dark: "bg-dark text-on-dark hover:bg-dark-hover shadow-sm active:scale-[0.98]",
   link: "text-primary-container hover:underline",
 };
 

@@ -81,3 +81,11 @@ export const users: User[] = [
     lastAccess: "Hoy 09:12",
   },
 ];
+
+
+export const authService = {
+
+  create: async ()=>{
+    
+  }
+}
