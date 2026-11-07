@@ -8,23 +8,6 @@ interface RequestOptions extends RequestInit {
 }
 
 class HttpClient {
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
-    const data = isJson ? await response.json() : null;
-
-    if (!response.ok) {
-      // Si el backend envió una estructura ApiResponse de error, la lanzamos
-      throw data || {
-        success: false,
-        message: `Error HTTP: ${response.status}`,
-        timestamp: new Date().toISOString(),
-      };
-    }
-
-    return data;
-  }
-
   private getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;
     // Si guardas el token en cookies para el middleware, podemos leerlo de ahí o de localStorage
@@ -66,9 +49,20 @@ class HttpClient {
       headers: requestHeaders,
     });
 
-    // Aquí parseamos directamente asumiendo que el backend siempre responde con la estructura ApiResponse<T>
-    const json: ApiResponse<T> = await response.json();
-    return json;
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+
+    if (isJson) {
+      const json: ApiResponse<T> = await response.json();
+      return json;
+    }
+
+    return {
+      success: response.ok,
+      message: response.statusText ? `HTTP ${response.status}: ${response.statusText}` : `HTTP ${response.status}`,
+      data: null as T,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   // Métodos reutilizables envueltos limpiamente

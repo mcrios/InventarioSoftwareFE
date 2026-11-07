@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 // 1. Define las rutas que son públicas (exactas o prefijos)
 const publicRoutes = [
   '/login',
+  '/register',
   '/registro',
   '/forgot-password',
   // Agrega aquí cualquier otra ruta pública, ej: '/contacto', '/sobre-nosotros'

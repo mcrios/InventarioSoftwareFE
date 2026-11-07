@@ -43,8 +43,16 @@ const toneStyles = {
     track: "bg-surface-container-lowest/50",
     bar: "bg-error",
   },
+  warning: {
+    card: "bg-warning-container text-on-warning-container",
+    label: "text-on-warning-container",
+    icon: "text-on-warning-container",
+    value: "text-on-warning-container",
+    detail: "bg-warning text-on-warning",
+    track: "bg-surface-container-lowest/30",
+    bar: "bg-warning",
+}
 } as const;
-
 export function StatCard({ stat }: StatCardProps) {
   const tone = toneStyles[stat.tone];
 
