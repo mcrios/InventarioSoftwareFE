@@ -22,14 +22,6 @@ export const navigation: NavSection[] = [
     ],
   },
   {
-    label: "Administración",
-    items: [
-      { label: "Empresas", href: "/company", icon: "corporate_fare" },
-      { label: "Usuarios", href: "/users", icon: "group" },
-      { label: "Configuración", href: "/settings", icon: "settings" },
-    ],
-  },
-  {
     label: "Operaciones",
     items: [
       {
@@ -52,6 +44,13 @@ export const navigation: NavSection[] = [
         href: "/notifications",
         icon: "notifications_active",
       },
+    ],
+  },
+  {
+    label: "Administración",
+    items: [
+      { label: "Empresas", href: "/company", icon: "corporate_fare" },
+      { label: "Usuarios", href: "/users", icon: "group" },
     ],
   },
   

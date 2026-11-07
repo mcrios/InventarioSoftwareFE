@@ -65,6 +65,9 @@ export const securityService = {
     );
   },
 
+  getUsuario: async (id: number): Promise<Usuario> =>
+    unwrap(await http.get<Usuario>(`/usuarios/${id}`)),
+
   createUsuario: async (payload: UsuarioInput): Promise<Usuario> =>
     unwrap(await http.post<Usuario>("/usuarios/", payload)),
 

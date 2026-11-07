@@ -1,4 +1,5 @@
 import { http } from '@/lib/httpClient';
+import { forgetCurrentUserId } from '@/lib/session';
 import type { LoginRequest, LoginResponse } from '@/types/api';
 
 export const authService = {
@@ -18,6 +19,7 @@ export const authService = {
 
   logout: () => {
     localStorage.removeItem('token');
+    forgetCurrentUserId();
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   },
 

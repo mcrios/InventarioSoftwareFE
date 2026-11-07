@@ -6,6 +6,8 @@ interface JwtPayload {
   email?: string;
 }
 
+const CURRENT_USER_ID_KEY = "currentUserId";
+
 function getToken() {
   if (typeof document === "undefined") return null;
 
@@ -46,23 +48,61 @@ export function getSessionEmail(): string | null {
   return payload?.sub ?? payload?.email ?? null;
 }
 
+/** Recuerda el id del usuario para mantener la sesión si luego cambia el correo. */
+export function rememberCurrentUserId(id: number) {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(CURRENT_USER_ID_KEY, String(id));
+}
+
+export function forgetCurrentUserId() {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.removeItem(CURRENT_USER_ID_KEY);
+}
+
+function getRememberedUserId(): number | null {
+  if (typeof window === "undefined") return null;
+
+  const value = window.localStorage.getItem(CURRENT_USER_ID_KEY);
+
+  if (!value) return null;
+
+  const id = Number(value);
+
+  return Number.isFinite(id) ? id : null;
+}
+
 /**
  * Resuelve la entidad Usuario del backend a partir del correo del JWT.
- * Devuelve null si no hay sesión o si el usuario no puede consultarse.
+ * Si el correo cambió y el token todavía apunta al anterior, usa el id
+ * recordado durante la sesión como respaldo.
  */
 export async function resolveCurrentUser(): Promise<Usuario | null> {
   const email = getSessionEmail();
 
-  if (!email) return null;
+  if (email) {
+    try {
+      const page = await securityService.listUsuarios({ page: 0, size: 100 });
+      const usuario = page.content.find(
+        (item) => item.email.toLowerCase() === email.toLowerCase(),
+      );
+
+      if (usuario) {
+        rememberCurrentUserId(usuario.id);
+        return usuario;
+      }
+    } catch {
+      // Continúa con el respaldo por id recordado.
+    }
+  }
+
+  const rememberedId = getRememberedUserId();
+
+  if (!rememberedId) return null;
 
   try {
-    const page = await securityService.listUsuarios({ page: 0, size: 100 });
-
-    return (
-      page.content.find(
-        (usuario) => usuario.email.toLowerCase() === email.toLowerCase(),
-      ) ?? null
-    );
+    return await securityService.getUsuario(rememberedId);
   } catch {
     return null;
   }

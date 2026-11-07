@@ -91,7 +91,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                           "flex items-center gap-space-sm rounded-xl px-space-md py-2.5 font-title-md text-title-md transition-all",
                           active
                             ? "bg-secondary-container text-on-surface"
-                            : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+                            : "text-on-surface hover:bg-surface-container-high hover:text-on-surface",
                         )}
                       >
                         <Icon name={item.icon} className="text-[20px]" />
