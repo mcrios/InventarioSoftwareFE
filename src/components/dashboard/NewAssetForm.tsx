@@ -7,11 +7,13 @@ import { Button, buttonStyles } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 
 export function NewAssetForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [category, setCategory] = useState("physical");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,24 +68,18 @@ export function NewAssetForm() {
             icon="account_tree"
             placeholder="VLAN 120 PROD-DB"
           />
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="category"
-              className="font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary"
-            >
-              Categoría
-            </label>
-            <select
-              id="category"
-              name="category"
-              defaultValue="physical"
-              className="rounded-xl border border-surface-variant bg-surface-container-lowest px-4 py-2.5 font-body-md text-body-md text-on-surface focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/20"
-            >
-              <option value="physical">Físico</option>
-              <option value="virtual">Virtual</option>
-              <option value="cloud">Cloud</option>
-            </select>
-          </div>
+          <Select
+            label="Categoría"
+            id="category"
+            value={category}
+            onChange={setCategory}
+            options={[
+              { value: "physical", label: "Físico" },
+              { value: "virtual", label: "Virtual" },
+              { value: "cloud", label: "Cloud" },
+            ]}
+            searchable={false}
+          />
         </div>
       </Card>
 

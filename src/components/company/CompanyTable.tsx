@@ -5,6 +5,7 @@ import { CompanyFilters, type CompanyStatusFilter } from "@/components/company/C
 import { CompanyRow } from "@/components/company/CompanyRow";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 import type { Empresa, EmpresaInput } from "@/types/api";
 
@@ -175,20 +176,18 @@ export function CompanyTable({
               <span className="font-label-mono-xs text-label-mono-xs text-secondary">
                 Por página:
               </span>
-              <select
-                value={pageSize}
-                onChange={(event) =>
-                  handlePageSizeChange(Number(event.target.value))
-                }
-                aria-label="Empresas por página"
-                className="rounded-lg bg-surface-container px-2 py-1 font-label-mono-xs text-label-mono-xs text-on-surface focus:outline-none"
-              >
-                {pageSizeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              <Select
+                value={String(pageSize)}
+                onChange={(value) => handlePageSizeChange(Number(value))}
+                options={pageSizeOptions.map((option) => ({
+                  value: String(option),
+                  label: String(option),
+                }))}
+                ariaLabel="Empresas por página"
+                size="sm"
+                searchable={false}
+                containerClassName="w-20"
+              />
             </div>
           </div>
 

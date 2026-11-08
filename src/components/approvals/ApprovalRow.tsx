@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { isPendingApproval } from "@/lib/approvalService";
 import { formatDateTime } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import type { SolicitudActualizacion } from "@/types/api";
 
 interface ApprovalRowProps {
@@ -29,12 +28,7 @@ export function ApprovalRow({ solicitud, onReview }: ApprovalRowProps) {
   const solicitante = solicitud.solicitante;
 
   return (
-    <tr
-      className={cn(
-        "group transition-colors hover:bg-surface-container-low",
-        pending && "bg-primary-container/5",
-      )}
-    >
+    <tr className="group transition-colors hover:bg-surface-container-low">
       <td className="px-4 py-3.5">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-container text-on-surface shadow-sm">

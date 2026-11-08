@@ -5,6 +5,7 @@ import { NotificationItem } from "@/components/notifications/NotificationItem";
 import { getNotificationTypeMeta } from "@/components/notifications/notificationMeta";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 import type { Notificacion } from "@/types/api";
 
@@ -200,19 +201,17 @@ export function NotificationList({
             <span className="font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary">
               Tipo:
             </span>
-            <select
+            <Select
               value={tipo}
-              onChange={(event) => handleTypeChange(event.target.value)}
-              aria-label="Filtrar notificaciones por tipo"
-              className="rounded-lg bg-surface-container px-3 py-1.5 font-title-md text-body-sm text-on-surface shadow-sm focus:outline-none"
-            >
-              <option value="all">Todos los tipos</option>
-              {typeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              onChange={handleTypeChange}
+              options={[
+                { value: "all", label: "Todos los tipos" },
+                ...typeOptions,
+              ]}
+              ariaLabel="Filtrar notificaciones por tipo"
+              size="sm"
+              containerClassName="min-w-[180px]"
+            />
             <span className="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-secondary">
               <Icon name="info" className="text-[16px]" />
               Los avisos se generan desde los flujos de aprobación y
@@ -291,20 +290,18 @@ export function NotificationList({
               <span className="font-label-mono-xs text-label-mono-xs text-secondary">
                 Por página:
               </span>
-              <select
-                value={pageSize}
-                onChange={(event) =>
-                  handlePageSizeChange(Number(event.target.value))
-                }
-                aria-label="Notificaciones por página"
-                className="rounded-lg bg-surface-container px-2 py-1 font-label-mono-xs text-label-mono-xs text-on-surface focus:outline-none"
-              >
-                {pageSizeOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+              <Select
+                value={String(pageSize)}
+                onChange={(value) => handlePageSizeChange(Number(value))}
+                options={pageSizeOptions.map((option) => ({
+                  value: String(option),
+                  label: String(option),
+                }))}
+                ariaLabel="Notificaciones por página"
+                size="sm"
+                searchable={false}
+                containerClassName="w-20"
+              />
             </div>
           </div>
 

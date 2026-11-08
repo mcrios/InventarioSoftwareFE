@@ -196,6 +196,17 @@ export interface Equipo {
   fechaCreacion: string;
 }
 
+export interface EquipoInput {
+  empresa: EntityRef;
+  responsable?: EntityRef | null;
+  nombre: string;
+  tipo: string;
+  ubicacion?: string | null;
+  fabricante?: string | null;
+  ip?: string | null;
+  salud?: string | null;
+}
+
 export interface SolicitudActualizacionEquipo {
   id: number;
   solicitud: SolicitudActualizacion;
@@ -212,6 +223,14 @@ export interface EquipoSoftware {
   versionInstalada: string;
   estadoOperativo: string;
   fechaInstalacion: string;
+}
+
+export interface EquipoSoftwareInput {
+  equipo: EntityRef;
+  software: EntityRef;
+  licencia?: EntityRef | null;
+  versionInstalada: string;
+  estadoOperativo?: string;
 }
 
 export interface Notificacion {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import type { User, UserRole, UserStatus } from "@/types/user";
 
 interface UsersTableProps {
@@ -31,6 +32,7 @@ export function UsersTable({ users }: UsersTableProps) {
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<UserRole | "Todos">("Todos");
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteRole, setInviteRole] = useState("Soporte");
   const [inviteSent, setInviteSent] = useState(false);
 
   const filteredUsers = useMemo(() => {
@@ -69,19 +71,17 @@ export function UsersTable({ users }: UsersTableProps) {
               className="w-full bg-transparent font-body-md text-body-md text-on-surface placeholder:text-secondary focus:outline-none"
             />
           </div>
-          <select
+          <Select
             value={role}
-            onChange={(event) =>
-              setRole(event.target.value as UserRole | "Todos")
-            }
-            className="rounded-xl border border-surface-variant bg-surface-container-lowest px-3 py-2 font-title-md text-body-sm text-on-surface shadow-sm focus:border-primary-container focus:outline-none"
-          >
-            {roles.map((option) => (
-              <option key={option} value={option}>
-                Rol: {option}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setRole(value as UserRole | "Todos")}
+            options={roles.map((option) => ({
+              value: option,
+              label: `Rol: ${option}`,
+            }))}
+            ariaLabel="Filtrar usuarios por rol"
+            searchable={false}
+            containerClassName="sm:w-48"
+          />
         </div>
 
         <Button onClick={() => setInviteOpen((value) => !value)}>
@@ -105,27 +105,17 @@ export function UsersTable({ users }: UsersTableProps) {
               placeholder="nombre@empresa.com"
               containerClassName="flex-1"
             />
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="invite-role"
-                className="font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary"
-              >
-                Rol
-              </label>
-              <select
-                id="invite-role"
-                defaultValue="Soporte"
-                className="rounded-xl border border-surface-variant bg-surface-container-lowest px-3 py-2.5 font-title-md text-body-sm text-on-surface focus:border-primary-container focus:outline-none"
-              >
-                {roles
-                  .filter((option) => option !== "Todos")
-                  .map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-              </select>
-            </div>
+            <Select
+              label="Rol"
+              id="invite-role"
+              value={inviteRole}
+              onChange={setInviteRole}
+              options={roles
+                .filter((option) => option !== "Todos")
+                .map((option) => ({ value: option, label: option }))}
+              searchable={false}
+              containerClassName="sm:w-44"
+            />
             <Button type="submit">
               <Icon name="send" className="text-[17px]" />
               <span>Enviar invitación</span>

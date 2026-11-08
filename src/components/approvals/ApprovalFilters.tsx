@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/ui/Icon";
+import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 import type { Empresa } from "@/types/api";
 
@@ -88,23 +89,23 @@ export function ApprovalFilters({
           <span className="font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary">
             Empresa:
           </span>
-          <select
-            value={companyId}
-            onChange={(event) =>
-              onCompanyChange(
-                event.target.value === "all" ? "all" : Number(event.target.value),
-              )
+          <Select
+            value={companyId === "all" ? "all" : String(companyId)}
+            onChange={(next) =>
+              onCompanyChange(next === "all" ? "all" : Number(next))
             }
-            aria-label="Filtrar solicitudes por empresa"
-            className="rounded-lg bg-surface-container px-3 py-1.5 font-title-md text-body-sm text-on-surface shadow-sm focus:outline-none"
-          >
-            <option value="all">Todas las empresas</option>
-            {companies.map((empresa) => (
-              <option key={empresa.id} value={empresa.id}>
-                {empresa.nombre}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "all", label: "Todas las empresas" },
+              ...companies.map((empresa) => ({
+                value: String(empresa.id),
+                label: empresa.nombre,
+                description: empresa.identificador ?? undefined,
+              })),
+            ]}
+            ariaLabel="Filtrar solicitudes por empresa"
+            size="sm"
+            containerClassName="min-w-[200px]"
+          />
           <span className="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-secondary">
             <Icon name="gavel" className="text-[16px]" />
             Solo se permite aprobar o rechazar solicitudes pendientes
