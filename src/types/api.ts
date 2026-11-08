@@ -301,6 +301,41 @@ export interface LicenciaRenovacionInput {
   codigoClave?: string | null;
 }
 
+export interface SoftwareInput {
+  licencia: EntityRef;
+  tipoSoftware: EntityRef;
+  nombre: string;
+  fabricante?: string | null;
+  versionActual: string;
+}
+
+export interface ActualizacionInput {
+  software: EntityRef;
+  versionOrigen?: string | null;
+  versionDestino: string;
+  tipoCambio: string;
+  descripcion?: string | null;
+}
+
+export interface SolicitudActualizacionInput {
+  empresa: EntityRef;
+  actualizacion: EntityRef;
+  solicitante: EntityRef;
+  aprobador?: EntityRef | null;
+  estado?: string;
+  formatoDespliegue: string;
+  fechaInicioRango: string;
+  fechaFinRango: string;
+  observaciones?: string | null;
+}
+
+export interface SolicitudActualizacionEquipoInput {
+  solicitud: EntityRef;
+  equipo: EntityRef;
+  estadoEjecucion?: string;
+  logResultado?: string | null;
+}
+
 /**
  * Convierte una entidad de respuesta en un payload de creación/actualización:
  * permite omitir cualquier campo y descarta los generados por el backend.

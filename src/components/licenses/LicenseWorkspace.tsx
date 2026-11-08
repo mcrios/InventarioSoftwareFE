@@ -279,13 +279,12 @@ export function LicenseWorkspace() {
       {/* Diálogo de confirmación para eliminar */}
       <ConfirmDialog
         open={Boolean(deletingLicense)}
-        onClose={() => !deletingBusy && setDeletingLicense(null)}
+        onCancel={() => !deletingBusy && setDeletingLicense(null)}
         onConfirm={handleConfirmDelete}
         title="¿Eliminar esta licencia?"
         description={`Estás a punto de eliminar la licencia con clave "${deletingLicense?.codigoClave || `#${deletingLicense?.id}`}" asignada a "${deletingLicense?.empresa?.nombre}". Si hay software vinculado a esta licencia, la operación podría ser rechazada.`}
-        confirmText="Eliminar Licencia"
-        busy={deletingBusy}
-        tone="danger"
+        confirmLabel="Eliminar Licencia"
+        loading={deletingBusy}
       />
     </div>
   );

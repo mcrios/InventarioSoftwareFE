@@ -4,6 +4,9 @@ import type {
   Page,
   PageableParams,
   SolicitudActualizacion,
+  SolicitudActualizacionEquipo,
+  SolicitudActualizacionEquipoInput,
+  SolicitudActualizacionInput,
   Usuario,
 } from "@/types/api";
 
@@ -72,4 +75,24 @@ export const approvalService = {
       ),
     );
   },
+
+  createSolicitud: async (
+    payload: SolicitudActualizacionInput,
+  ): Promise<SolicitudActualizacion> =>
+    unwrap(
+      await http.post<SolicitudActualizacion>(
+        "/solicitudes-actualizacion/",
+        payload,
+      ),
+    ),
+
+  createSolicitudEquipo: async (
+    payload: SolicitudActualizacionEquipoInput,
+  ): Promise<SolicitudActualizacionEquipo> =>
+    unwrap(
+      await http.post<SolicitudActualizacionEquipo>(
+        "/solicitudes-actualizacion-equipo/",
+        payload,
+      ),
+    ),
 };

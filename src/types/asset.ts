@@ -37,7 +37,12 @@ export interface Asset {
   };
 }
 
-export type FleetStatTone = "neutral" | "primary" | "secondary" | "danger";
+export type FleetStatTone =
+  | "neutral"
+  | "primary"
+  | "secondary"
+  | "warning"
+  | "danger";
 
 export interface FleetStat {
   id: string;
