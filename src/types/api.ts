@@ -286,6 +286,21 @@ export interface RolInput {
 
 export type AccesoInput = Omit<Acceso, "id">;
 
+export interface LicenciaInput {
+  empresa: EntityRef;
+  codigoClave?: string | null;
+  archivoUrl?: string | null;
+  cantidadTotal: number;
+  cantidadUsada?: number;
+  fechaVencimiento?: string | null;
+}
+
+export interface LicenciaRenovacionInput {
+  fechaVencimiento: string;
+  cantidadTotal?: number;
+  codigoClave?: string | null;
+}
+
 /**
  * Convierte una entidad de respuesta en un payload de creación/actualización:
  * permite omitir cualquier campo y descarta los generados por el backend.
