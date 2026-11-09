@@ -159,19 +159,20 @@ export function SoftwareRow({
             <Icon name="edit" className="text-[18px]" />
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="secondary"
+            size="sm"
             onClick={() => onCreateUpdate(software)}
             aria-label={`Publicar actualización de ${software.nombre}`}
             title="Publicar actualización"
           >
             <Icon name="system_update_alt" className="text-[18px]" />
+            <span>Actualizar</span>
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => onRequestDeployment(software)}
-            disabled={!latestUpdate}
+            disabled={solicitud?.estado === 'APROBADA' || solicitud?.estado === 'RECHAZADA'}
             title={
               latestUpdate
                 ? "Solicitar despliegue"

@@ -1,53 +1,112 @@
+'use client'
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { useEffect, useState } from "react";
+import { Equipo, Licencia, Notificacion, Page, Software, SolicitudActualizacion, Usuario } from "@/types/api";
+import { equipmentService } from "@/lib/equipmentService";
+import { softwareService } from "@/lib/softwareService";
+import { approvalService } from "@/lib/approvalService";
+import { licenseService } from "@/lib/licenseService";
+import { notificationService } from "@/lib/notificationService";
+import { securityService } from "@/lib/securityService";
 
-const modules = [
-  {
-    href: "/inventory",
-    icon: "devices",
-    title: "Inventario de Activos",
-    description: "1,428 nodos físicos, virtuales y cloud.",
-    metric: "1,428",
-  },
-  {
-    href: "/software",
-    icon: "system_update_alt",
-    title: "Software y Parches",
-    description: "Despliegues pendientes y ventanas de mantenimiento.",
-    metric: "37",
-  },
-  {
-    href: "/approvals",
-    icon: "verified_user",
-    title: "Aprobaciones",
-    description: "Solicitudes de acceso y cambios en revisión.",
-    metric: "12",
-  },
-  {
-    href: "/licenses",
-    icon: "key",
-    title: "Gestión de Licencias",
-    description: "Renovaciones, asientos y costo por proveedor.",
-    metric: "94%",
-  },
-  {
-    href: "/users",
-    icon: "group",
-    title: "Usuarios y Roles",
-    description: "Altas, bajas y permisos del equipo de operación.",
-    metric: "8",
-  },
-  {
-    href: "/alerts",
-    icon: "notifications_active",
-    title: "Alertas & CVEs",
-    description: "Hallazgos críticos y seguimiento de remediación.",
-    metric: "14",
-  },
-];
 
 export function QuickAccess() {
+  const [equipos, setEquipos] = useState<Equipo[]>([])
+  const [software, setSoftware] = useState<Software[]>([])
+  const [solicitudes, setSolicitudes] = useState<SolicitudActualizacion[]>([])
+  const [licencias, setLicencias] = useState<Licencia[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
+  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const load = async () => {
+    try {
+      setLoading(true);
+
+      // 1. Obtenemos todos los datos de las APIs en paralelo para mayor velocidad
+      const [
+        resEquipos,
+        resSoftware,
+        resSolicitudes,
+        resLicencias,
+        resUsuarios,
+        resNotificaciones
+      ] = await Promise.all([
+        equipmentService.listEquipos(),
+        softwareService.listSoftware(),
+        approvalService.listSolicitudes(),
+        licenseService.listLicencias(),
+        securityService.listUsuarios(),
+        notificationService.listNotificaciones()
+      ]);
+
+      // 2. Actualizamos los estados con los contenidos reales
+      setEquipos(resEquipos.content || []);
+      setSoftware(resSoftware.content || []);
+      setSolicitudes(resSolicitudes.content || []);
+      setLicencias(resLicencias.content || []);
+      setUsuarios(resUsuarios.content || []);
+      setNotificaciones(resNotificaciones.content || []);
+
+    } catch (error) {
+      console.error("Error al cargar los datos del dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load()
+
+  }, [])
+
+  const modules = [
+    {
+      href: "/inventory",
+      icon: "devices",
+      title: "Inventario de Activos",
+      description: "Servidores, PC, Laptops, Virtuales y Cloud",
+      metric: equipos.length,
+    },
+    {
+      href: "/software",
+      icon: "system_update_alt",
+      title: "Software y Parches",
+      description: "Software instalado en sus equipos y listos para pogramar despliegues.",
+      metric: software.length,
+    },
+    {
+      href: "/approvals",
+      icon: "verified_user",
+      title: "Centro de Actualizaciones",
+      description: "Solicitudes cambios actualizacion.",
+      metric: solicitudes.length,
+    },
+    {
+      href: "/licenses",
+      icon: "key",
+      title: "Gestión de Licencias",
+      description: "Renovaciones y manejo de disponibilidad.",
+      metric: licencias.length,
+    },
+    {
+      href: "/users",
+      icon: "group",
+      title: "Usuarios y Roles",
+      description: "Altas, bajas y permisos del equipo de operación.",
+      metric: usuarios.length,
+    },
+    {
+      href: "/notifications",
+      icon: "notifications_active",
+      title: "Alertas & CVEs",
+      description: "Centro alertas que afectan su equipo.",
+      metric: notificaciones.length,
+    },
+  ];
+
   return (
     <div className="mb-6">
       <div className="mb-3 flex items-center justify-between">

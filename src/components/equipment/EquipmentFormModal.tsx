@@ -21,6 +21,7 @@ import type {
   Empresa,
   Equipo,
   EquipoInput,
+  EquipoSoftware,
   Software,
   Usuario,
 } from "@/types/api";
@@ -31,6 +32,8 @@ interface EquipmentFormModalProps {
   empresas: Empresa[];
   usuarios: Usuario[];
   software: Software[];
+  /** Instalaciones actuales del equipo; solo se usan al editar. */
+  instalaciones: EquipoSoftware[];
   onClose: () => void;
   onSubmit: (
     input: EquipoInput,
@@ -131,6 +134,7 @@ export function EquipmentFormModal({
   empresas,
   usuarios,
   software,
+  instalaciones,
   onClose,
   onSubmit,
 }: EquipmentFormModalProps) {
@@ -138,7 +142,15 @@ export function EquipmentFormModal({
     buildFormState(equipo, empresas),
   );
   const [step, setStep] = useState<1 | 2>(1);
-  const [selected, setSelected] = useState<Record<number, string>>({});
+  const [selected, setSelected] = useState<Record<number, string>>(() => {
+    const initial: Record<number, string> = {};
+
+    instalaciones.forEach((instalacion) => {
+      initial[instalacion.software.id] = instalacion.versionInstalada;
+    });
+
+    return initial;
+  });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -198,10 +210,18 @@ export function EquipmentFormModal({
 
     if (!empresaId) return [];
 
+    const installedIds = new Set(
+      instalaciones.map((instalacion) => instalacion.software.id),
+    );
+
     return software
-      .filter((item) => item.licencia?.empresa?.id === empresaId)
+      .filter(
+        (item) =>
+          item.licencia?.empresa?.id === empresaId ||
+          installedIds.has(item.id),
+      )
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-  }, [form, software]);
+  }, [form.empresaId, instalaciones, software]);
 
   const empresaNombre =
     empresaOptions.find((empresa) => String(empresa.id) === form.empresaId)
@@ -220,7 +240,21 @@ export function EquipmentFormModal({
       empresaId: value,
       responsableId: "",
     }));
-    setSelected({});
+    setSelected((current) => {
+      if (!editing) return {};
+
+      // Al editar se conservan las instalaciones existentes del equipo, pero se
+      // descartan selecciones nuevas que ya no pertenecen a la empresa elegida.
+      const installedIds = new Set(
+        instalaciones.map((instalacion) => instalacion.software.id),
+      );
+
+      return Object.fromEntries(
+        Object.entries(current).filter(([softwareId]) =>
+          installedIds.has(Number(softwareId)),
+        ),
+      );
+    });
     setError(null);
   }
 
@@ -277,28 +311,36 @@ export function EquipmentFormModal({
 
     if (!validateDetails()) return;
 
-    if (!editing && step === 1) {
+    if (step === 1) {
       setError(null);
       setStep(2);
       return;
     }
 
     const empresaId = Number(form.empresaId);
-    const instalaciones: SoftwareAssignment[] = Object.entries(
-      selected,
-    ).flatMap(([softwareId, version]) => {
-      const item = software.find((entry) => entry.id === Number(softwareId));
+    const assignments: SoftwareAssignment[] = Object.entries(selected).flatMap(
+      ([softwareId, version]) => {
+        const id = Number(softwareId);
+        const item = software.find((entry) => entry.id === id);
+        const instalacion = instalaciones.find(
+          (entry) => entry.software.id === id,
+        );
 
-      if (!item) return [];
+        if (!item && !instalacion) return [];
 
-      return [
-        {
-          softwareId: item.id,
-          licenciaId: item.licencia?.id ?? null,
-          versionInstalada: version.trim() || item.versionActual,
-        },
-      ];
-    });
+        return [
+          {
+            softwareId: id,
+            licenciaId: item?.licencia?.id ?? instalacion?.licencia?.id ?? null,
+            versionInstalada:
+              version.trim() ||
+              item?.versionActual ||
+              instalacion?.versionInstalada ||
+              "",
+          },
+        ];
+      },
+    );
 
     setSaving(true);
     setError(null);
@@ -317,7 +359,7 @@ export function EquipmentFormModal({
           ubicacion: nullable(form.ubicacion),
           salud: nullable(form.salud),
         },
-        editing ? [] : instalaciones,
+        assignments,
       );
       onClose();
     } catch (submitError) {
@@ -335,28 +377,11 @@ export function EquipmentFormModal({
       title={editing ? "Editar equipo" : "Nuevo equipo"}
       description={
         editing
-          ? "Actualiza la ficha del equipo sin alterar el software instalado."
+          ? "Paso 1: actualiza los datos del equipo. Paso 2: ajusta el software instalado y sus versiones."
           : "Paso 1: registra los datos del equipo. Paso 2: asigna el software con licencia de su empresa."
       }
       footer={
-        editing ? (
-          <>
-            <Button variant="secondary" onClick={onClose} disabled={saving}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              form="equipment-form"
-              disabled={saving || empresaOptions.length === 0}
-            >
-              <Icon
-                name={saving ? "progress_activity" : "save"}
-                className={cn("text-[17px]", saving && "animate-spin")}
-              />
-              <span>{saving ? "Guardando..." : "Guardar cambios"}</span>
-            </Button>
-          </>
-        ) : step === 1 ? (
+        step === 1 ? (
           <>
             <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancelar
@@ -387,13 +412,19 @@ export function EquipmentFormModal({
                 name={saving ? "progress_activity" : "save"}
                 className={cn("text-[17px]", saving && "animate-spin")}
               />
-              <span>{saving ? "Creando..." : "Crear equipo"}</span>
+              <span>
+                {saving
+                  ? "Guardando..."
+                  : editing
+                    ? "Guardar cambios"
+                    : "Crear equipo"}
+              </span>
             </Button>
           </>
         )
       }
     >
-      {editing ? null : <StepIndicator step={step} />}
+      <StepIndicator step={step} />
 
       {error ? (
         <div className="mb-4 flex items-start gap-2 rounded-xl bg-error-container px-3 py-2.5 font-body-sm text-body-sm text-on-error-container">
@@ -407,7 +438,7 @@ export function EquipmentFormModal({
         onSubmit={handleSubmit}
         className="flex flex-col gap-4"
       >
-        {editing || step === 1 ? (
+        {step === 1 ? (
           <>
             {empresaOptions.length === 0 ? (
               <div className="flex items-start gap-2 rounded-xl bg-surface-container-low px-3 py-2.5 font-body-sm text-body-sm text-secondary">
@@ -538,8 +569,10 @@ export function EquipmentFormModal({
                   {empresaNombre ?? "la empresa seleccionada"}
                 </strong>
                 . Marca lo que esté instalado y ajusta la versión si es distinta
-                a la del catálogo. Puedes continuar sin seleccionar software y
-                asignarlo después desde la ficha técnica.
+                a la del catálogo.{" "}
+                {editing
+                  ? "El software ya instalado aparece preseleccionado; desmárcalo si quieres quitarlo del equipo."
+                  : "Puedes continuar sin seleccionar software y asignarlo después desde la ficha técnica."}
               </span>
             </div>
 

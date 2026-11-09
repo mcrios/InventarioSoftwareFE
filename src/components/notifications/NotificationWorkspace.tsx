@@ -10,7 +10,8 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/Icon";
 import { notificationService } from "@/lib/notificationService";
 import { cn, getErrorMessage } from "@/lib/utils";
-import type { Notificacion } from "@/types/api";
+import type { Notificacion, Usuario } from "@/types/api";
+import { resolveCurrentUser } from "@/lib/session";
 
 export function NotificationWorkspace() {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
@@ -24,6 +25,7 @@ export function NotificationWorkspace() {
   const [markingAll, setMarkingAll] = useState(false);
   const [deleting, setDeleting] = useState<Notificacion | null>(null);
   const [deletingBusy, setDeletingBusy] = useState(false);
+  const [currentUser, setCurrentUser] = useState<Usuario|null>(null);
 
   const noticeTimer = useRef<number | null>(null);
 
@@ -51,7 +53,7 @@ export function NotificationWorkspace() {
         size: 100,
         sort: ["id,desc"],
       });
-      setNotificaciones(page.content);
+      setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.id === currentUser?.id));
       setError(null);
     } catch (loadError) {
       setError(getErrorMessage(loadError));
@@ -63,11 +65,20 @@ export function NotificationWorkspace() {
   useEffect(() => {
     let cancelled = false;
 
+    resolveCurrentUser()
+          .then((usuario) => {
+            if (!cancelled) setCurrentUser(usuario);
+            console.log(usuario);
+          })
+          .finally(() => {
+            if (!cancelled) setLoading(false);
+          });
+
     notificationService
       .listNotificaciones({ page: 0, size: 100, sort: ["id,desc"] })
       .then((page) => {
         if (cancelled) return;
-        setNotificaciones(page.content);
+        setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.id === currentUser?.id));
         setError(null);
       })
       .catch((loadError) => {

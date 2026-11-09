@@ -234,7 +234,7 @@ export function SoftwareTable({
                 <th className="px-4 py-3 font-semibold">Versión</th>
                 <th className="px-4 py-3 font-semibold">Actualizaciones</th>
                 <th className="px-4 py-3 font-semibold">Solicitud</th>
-                <th className="px-4 py-3 text-right font-semibold">Acciones</th>
+                <th className="px-4 py-3 text-center font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-container bg-surface-container-lowest">

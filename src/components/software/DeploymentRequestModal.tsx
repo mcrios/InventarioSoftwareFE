@@ -284,7 +284,7 @@ export function DeploymentRequestModal({
               </span>
               <span className="truncate font-label-mono-xs text-label-mono-xs text-on-dark/70">
                 {software.licencia.empresa.nombre} · Licencia #
-                {software.licencia.id}
+                {software.licencia.codigoClave}
               </span>
             </div>
           </div>
@@ -298,26 +298,26 @@ export function DeploymentRequestModal({
           </div>
         </div>
 
-        <Select
-          label="Actualización a desplegar"
-          id="deployment-update"
-          value={updateId}
-          onChange={setUpdateId}
-          options={updates.map((actualizacion) => ({
-            value: String(actualizacion.id),
-            label: `v${actualizacion.versionDestino}`,
-            description: `Desde v${
-              actualizacion.versionOrigen || software.versionActual
-            } · ${actualizacion.tipoCambio}`,
-          }))}
-          placeholder="Selecciona una actualización"
-          searchable={updates.length > 6}
-          emptyMessage="No hay actualizaciones disponibles"
-          disabled={updates.length === 0}
-          required
-        />
-
         <div className="grid gap-4 sm:grid-cols-2">
+          <Select
+            label="Actualización a desplegar"
+            id="deployment-update"
+            value={updateId}
+            onChange={setUpdateId}
+            options={updates.map((actualizacion) => ({
+              value: String(actualizacion.id),
+              label: `v${actualizacion.versionDestino}`,
+              description: `Desde v${
+                actualizacion.versionOrigen || software.versionActual
+              } · ${actualizacion.tipoCambio}`,
+            }))}
+            placeholder="Selecciona una actualización"
+            searchable={updates.length > 6}
+            emptyMessage="No hay actualizaciones disponibles"
+            disabled={updates.length === 0}
+            required
+          />
+          
           <Select
             label="Formato de despliegue"
             id="deployment-format"

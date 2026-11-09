@@ -1,8 +1,12 @@
-import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
-import { telemetryEvents } from "@/lib/inventory";
 import { cn } from "@/lib/utils";
+import { Licencia } from "@/types/api";
+import Link from "next/link";
+
+interface TelemetryProps {
+  licencias: Licencia[]
+}
 
 const toneStyles = {
   success: { dot: "bg-primary-container", host: "text-on-surface" },
@@ -10,7 +14,7 @@ const toneStyles = {
   neutral: { dot: "bg-secondary", host: "text-on-surface" },
 } as const;
 
-export function TelemetryFeed() {
+export function TelemetryFeed({licencias}: TelemetryProps) {
   return (
     <Card className="flex flex-col justify-between p-5 xl:col-span-7">
       <div className="flex items-center justify-between pb-3">
@@ -29,29 +33,29 @@ export function TelemetryFeed() {
       </div>
 
       <div className="mt-2 flex flex-col gap-2.5">
-        {telemetryEvents.map((event) => (
+        {licencias.map((event) => (
           <div
             key={event.id}
             className="flex flex-col gap-2 rounded-xl bg-surface-container-lowest p-2.5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex flex-wrap items-center gap-3">
               <span
-                className={cn("h-2 w-2 rounded-full", toneStyles[event.tone].dot)}
+                className={cn("h-2 w-2 rounded-full", toneStyles["success"].dot)}
               />
               <span
                 className={cn(
                   "font-code-md text-code-md font-medium",
-                  toneStyles[event.tone].host,
+                  toneStyles["success"].host,
                 )}
               >
-                {event.host}
+                {event.codigoClave}
               </span>
               <span className="font-body-sm text-body-sm text-secondary">
-                {event.message}
+                {event.empresa.nombre}
               </span>
             </div>
             <span className="font-label-mono-xs text-label-mono-xs text-secondary">
-              {event.time}
+              {event.cantidadUsada + "/"+event.cantidadTotal}
             </span>
           </div>
         ))}
@@ -59,10 +63,10 @@ export function TelemetryFeed() {
 
       <div className="flex flex-col gap-2 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-label-mono-xs text-label-mono-xs text-secondary">
-          Canal Syslog: udp://logstash.internal.fleet:514
+          
         </span>
         <Link
-          href="/alerts"
+          href="/notifications"
           className="font-title-md text-body-sm text-primary-container hover:underline"
         >
           Abrir Centro de Alertas →

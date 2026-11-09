@@ -40,7 +40,7 @@ type EquipmentLoadResults = [
 ];
 
 function failedAssignmentsMessage(
-  results: PromiseSettledResult<EquipoSoftware>[],
+  results: PromiseSettledResult<unknown>[],
 ) {
   const rejected = results.find(
     (result): result is PromiseRejectedResult => result.status === "rejected",
@@ -194,6 +194,7 @@ export function EquipmentWorkspace() {
     input: EquipoInput,
     assignments: SoftwareAssignment[],
   ) {
+    console.log("TIPO DE EVENTO " , formTarget)
     if (formTarget && formTarget !== "new") {
       const updated = await equipmentService.updateEquipo(
         formTarget.id,
@@ -203,7 +204,139 @@ export function EquipmentWorkspace() {
       setEquipos((current) =>
         current.map((equipo) => (equipo.id === updated.id ? updated : equipo)),
       );
-      notify("Equipo actualizado correctamente.");
+
+      const currentInstalaciones = instalaciones.filter(
+        (instalacion) => instalacion.equipo.id === updated.id,
+      );
+      const currentBySoftware = new Map(
+        currentInstalaciones.map((instalacion) => [
+          instalacion.software.id,
+          instalacion,
+        ]),
+      );
+      const selectedIds = new Set(
+        assignments.map((assignment) => assignment.softwareId),
+      );
+
+      const toCreate = assignments.filter(
+        (assignment) => !currentBySoftware.has(assignment.softwareId),
+      );
+      const toUpdate = assignments.flatMap((assignment) => {
+        const instalacion = currentBySoftware.get(assignment.softwareId);
+
+        if (!instalacion) return [];
+
+        const sameVersion =
+          instalacion.versionInstalada === assignment.versionInstalada;
+        const sameLicencia =
+          (instalacion.licencia?.id ?? null) === assignment.licenciaId;
+
+        return sameVersion && sameLicencia ? [] : [{ assignment, instalacion }];
+      });
+      const toRemove = currentInstalaciones.filter(
+        (instalacion) => !selectedIds.has(instalacion.software.id),
+      );
+
+      const [createResults, updateResults, removeResults] = await Promise.all([
+        Promise.allSettled(
+          toCreate.map((assignment) =>
+            equipmentService.createEquipoSoftware({
+              equipo: { id: updated.id },
+              software: { id: assignment.softwareId },
+              licencia: assignment.licenciaId
+                ? { id: assignment.licenciaId }
+                : null,
+              versionInstalada: assignment.versionInstalada,
+            }),
+          ),
+        ),
+        Promise.allSettled(
+          toUpdate.map(({ assignment, instalacion }) =>
+            equipmentService.updateEquipoSoftware(instalacion.id, {
+              equipo: { id: updated.id },
+              software: { id: assignment.softwareId },
+              licencia: assignment.licenciaId
+                ? { id: assignment.licenciaId }
+                : null,
+              versionInstalada: assignment.versionInstalada,
+              estadoOperativo: instalacion.estadoOperativo,
+            }),
+          ),
+        ),
+        Promise.allSettled(
+          toRemove.map((instalacion) =>
+            equipmentService.deleteEquipoSoftware(instalacion.id),
+          ),
+        ),
+      ]);
+
+      const createdInstalaciones = createResults.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value] : [],
+      );
+      const updatedInstalaciones = updateResults.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value] : [],
+      );
+      const removedIds = new Set(
+        toRemove.flatMap((instalacion, index) =>
+          removeResults[index]?.status === "fulfilled" ? [instalacion.id] : [],
+        ),
+      );
+
+      setInstalaciones((current) => {
+        const next = current
+          .filter((instalacion) => !removedIds.has(instalacion.id))
+          .map(
+            (instalacion) =>
+              updatedInstalaciones.find(
+                (updatedItem) => updatedItem.id === instalacion.id,
+              ) ?? instalacion,
+          );
+
+        return [...createdInstalaciones, ...next];
+      });
+
+      const failure =
+        failedAssignmentsMessage(createResults) ??
+        failedAssignmentsMessage(updateResults) ??
+        failedAssignmentsMessage(removeResults);
+
+      if (failure) {
+        notify(
+          `Equipo actualizado, pero no se pudo sincronizar todo el software: ${failure}`,
+          "error",
+        );
+        return;
+      }
+
+      const changes: string[] = [];
+
+      if (createdInstalaciones.length) {
+        changes.push(
+          `${createdInstalaciones.length} software asignado${
+            createdInstalaciones.length === 1 ? "" : "s"
+          }`,
+        );
+      }
+
+      if (updatedInstalaciones.length) {
+        changes.push(
+          `${updatedInstalaciones.length} actualizado${
+            updatedInstalaciones.length === 1 ? "" : "s"
+          }`,
+        );
+      }
+
+      if (removedIds.size) {
+        changes.push(
+          `${removedIds.size} quitado${removedIds.size === 1 ? "" : "s"}`,
+        );
+      }
+
+      notify(
+        changes.length
+          ? `Equipo actualizado. Software: ${changes.join(" · ")}.`
+          : "Equipo actualizado correctamente.",
+      );
       return;
     }
 
@@ -518,11 +651,19 @@ export function EquipmentWorkspace() {
 
       {formTarget ? (
         <EquipmentFormModal
+          key={formTarget === "new" ? "new" : formTarget.id}
           open
           equipo={formTarget === "new" ? null : formTarget}
           empresas={empresas}
           usuarios={usuarios}
           software={software}
+          instalaciones={
+            formTarget === "new"
+              ? []
+              : instalaciones.filter(
+                  (instalacion) => instalacion.equipo.id === formTarget.id,
+                )
+          }
           onClose={() => setFormTarget(null)}
           onSubmit={handleSubmit}
         />
