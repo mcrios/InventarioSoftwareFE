@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { authService } from "@/lib/authService";
-import { currentUser } from "@/lib/userService";
+import { useSessionUser } from "@/hooks/useSessionUser";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -32,6 +32,7 @@ const menuItems = [
 
 export function UserMenu() {
   const router = useRouter();
+  const sessionUser = useSessionUser();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -84,7 +85,7 @@ export function UserMenu() {
         )}
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-label-mono-sm text-label-mono-sm text-on-primary">
-          {currentUser.initials}
+          {sessionUser.initials}
         </span>
         <Icon
           name="expand_more"
@@ -104,14 +105,14 @@ export function UserMenu() {
         >
           <div className="flex items-center gap-3 bg-surface-container-low px-space-md py-space-sm">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-label-mono-sm text-label-mono-sm text-on-primary">
-              {currentUser.initials}
+              {sessionUser.initials}
             </span>
             <div className="flex min-w-0 flex-col">
               <span className="truncate font-title-md text-title-md leading-tight text-on-surface">
-                {currentUser.fullName}
+                {sessionUser.fullName}
               </span>
               <span className="font-label-mono-xs text-label-mono-xs uppercase text-secondary">
-                {currentUser.role}
+                {sessionUser.role}
               </span>
             </div>
             <span

@@ -7,7 +7,7 @@ import { ProfileSummary } from "@/components/settings/ProfileSummary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
-import { rememberCurrentUserId, resolveCurrentUser } from "@/lib/session";
+import { rememberCurrentUser, resolveCurrentUser } from "@/lib/session";
 import { cn, getErrorMessage } from "@/lib/utils";
 import type { Usuario } from "@/types/api";
 
@@ -96,7 +96,7 @@ export function ProfileWorkspace() {
       usuario !== null &&
       updated.email.toLowerCase() !== usuario.email.toLowerCase();
 
-    rememberCurrentUserId(updated.id);
+    rememberCurrentUser(updated);
     setUsuario(updated);
 
     notify(

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { navigation } from "@/lib/navigation";
-import { currentUser } from "@/lib/userService";
+import { useSessionUser } from "@/hooks/useSessionUser";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const sessionUser = useSessionUser();
 
   return (
     <>
@@ -129,10 +130,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               </div>
               <div className="flex flex-col">
                 <span className="font-title-md text-title-md leading-tight text-on-surface">
-                  {currentUser.name}
+                  {sessionUser.name}
                 </span>
                 <span className="font-label-mono-xs text-label-mono-xs text-secondary">
-                  {currentUser.role}
+                  {sessionUser.role}
                 </span>
               </div>
             </div>
