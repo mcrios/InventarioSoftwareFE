@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { navigation } from "@/lib/navigation";
+import { getVisibleNavigation } from "@/lib/access";
 import { useSessionUser } from "@/hooks/useSessionUser";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,11 @@ interface SidebarProps {
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const sessionUser = useSessionUser();
+
+  const sections = useMemo(
+    () => getVisibleNavigation(sessionUser.accessPaths),
+    [sessionUser.accessPaths],
+  );
 
   return (
     <>
@@ -69,7 +75,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </div>
 
           <div className="flex-1 overflow-y-auto px-space-sm pb-space-md">
-            {navigation.map((section) => (
+            {sections.map((section) => (
               <div key={section.label}>
                 <div className="px-space-md pb-space-xs pt-space-md">
                   <span className="font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary">

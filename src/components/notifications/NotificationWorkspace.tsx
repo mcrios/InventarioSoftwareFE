@@ -77,8 +77,10 @@ export function NotificationWorkspace() {
     notificationService
       .listNotificaciones({ page: 0, size: 100, sort: ["id,desc"] })
       .then((page) => {
+        console.log(currentUser);
+        
         if (cancelled) return;
-        setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.id === currentUser?.id));
+        setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.email === currentUser?.email));
         setError(null);
       })
       .catch((loadError) => {

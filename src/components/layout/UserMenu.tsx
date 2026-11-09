@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { canAccessPath } from "@/lib/access";
 import { authService } from "@/lib/authService";
 import { useSessionUser } from "@/hooks/useSessionUser";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,14 @@ export function UserMenu() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const visibleMenuItems = useMemo(
+    () =>
+      menuItems.filter((item) =>
+        canAccessPath(sessionUser.accessPaths, item.href),
+      ),
+    [sessionUser.accessPaths],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -125,7 +134,7 @@ export function UserMenu() {
           </div>
 
           <div className="flex flex-col gap-0.5 p-2">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

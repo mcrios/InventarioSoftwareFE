@@ -1,10 +1,6 @@
+import { decodeJwtPayload, type JwtPayload } from "@/lib/jwt";
 import { securityService } from "@/lib/securityService";
 import type { Usuario } from "@/types/api";
-
-interface JwtPayload {
-  sub?: string;
-  email?: string;
-}
 
 const CURRENT_USER_ID_KEY = "currentUserId";
 const CURRENT_USER_KEY = "currentUser";
@@ -24,20 +20,7 @@ function getToken() {
 }
 
 function decodePayload(token: string): JwtPayload | null {
-  try {
-    const payload = token.split(".")[1];
-
-    if (!payload) return null;
-
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const binary = window.atob(base64);
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    const json = new TextDecoder().decode(bytes);
-
-    return JSON.parse(json) as JwtPayload;
-  } catch {
-    return null;
-  }
+  return decodeJwtPayload<JwtPayload>(token);
 }
 
 /** Correo del usuario autenticado, leído desde el subject del JWT. */

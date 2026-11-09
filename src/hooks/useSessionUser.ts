@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getAccessPathsFromUsuario } from "@/lib/access";
 import {
   getCurrentUserSnapshot,
   resolveCurrentUser,
@@ -16,6 +17,8 @@ export interface SessionUser {
   initials: string;
   role: string;
   email: string | null;
+  /** Rutas de los accesos que otorgan los roles del usuario. */
+  accessPaths: string[];
 }
 
 function getInitials(nombre: string) {
@@ -88,6 +91,7 @@ export function useSessionUser(): SessionUser {
       initials: nombre ? getInitials(nombre) : "US",
       role,
       email: usuario?.email ?? null,
+      accessPaths: getAccessPathsFromUsuario(usuario),
     };
   }, [usuario]);
 }
