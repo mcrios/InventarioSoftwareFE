@@ -53,7 +53,7 @@ export function NotificationWorkspace() {
         size: 100,
         sort: ["id,desc"],
       });
-      setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.id === currentUser?.id));
+      setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.email === currentUser?.email));
       setError(null);
     } catch (loadError) {
       setError(getErrorMessage(loadError));
