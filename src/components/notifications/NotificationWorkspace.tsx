@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { NotificationStats } from "@/components/notifications/NotificationStats";
 import { PageHeader } from "@/components/dashboard/PageHeader";
@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/Icon";
+import { useSessionUser } from "@/hooks/useSessionUser";
 import { notificationService } from "@/lib/notificationService";
 import { cn, getErrorMessage } from "@/lib/utils";
-import type { Notificacion, Usuario } from "@/types/api";
-import { resolveCurrentUser } from "@/lib/session";
+import type { Notificacion } from "@/types/api";
 
 export function NotificationWorkspace() {
+  const { usuario, email: sessionEmail, ready: sessionReady } = useSessionUser();
+
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,6 @@ export function NotificationWorkspace() {
   const [markingAll, setMarkingAll] = useState(false);
   const [deleting, setDeleting] = useState<Notificacion | null>(null);
   const [deletingBusy, setDeletingBusy] = useState(false);
-  const [currentUser, setCurrentUser] = useState<Usuario|null>(null);
 
   const noticeTimer = useRef<number | null>(null);
 
@@ -44,46 +45,46 @@ export function NotificationWorkspace() {
     [],
   );
 
+  const fetchPage = useCallback(
+    async () =>
+      (
+        await notificationService.listNotificaciones({
+          page: 0,
+          size: 100,
+          sort: ["id,desc"],
+        })
+      ).content,
+    [],
+  );
+
   const load = useCallback(async () => {
     setLoading(true);
 
     try {
-      const page = await notificationService.listNotificaciones({
-        page: 0,
-        size: 100,
-        sort: ["id,desc"],
-      });
-      setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.email === currentUser?.email));
+      // Se guardan todas y el filtro por usuario se deriva en el render para
+      // no depender del orden en que se resuelva la sesión.
+      setNotificaciones(await fetchPage());
       setError(null);
     } catch (loadError) {
       setError(getErrorMessage(loadError));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchPage]);
 
   useEffect(() => {
     let cancelled = false;
 
-    resolveCurrentUser()
-          .then((usuario) => {
-            if (!cancelled) setCurrentUser(usuario);
-            console.log(usuario);
-          })
-          .finally(() => {
-            if (!cancelled) setLoading(false);
-          });
-
-    notificationService
-      .listNotificaciones({ page: 0, size: 100, sort: ["id,desc"] })
-      .then((page) => {
-        console.log(currentUser);
-        
+    // La carga inicial no activa `loading` porque ya inicia en true; así se
+    // evita un setState síncrono dentro del efecto.
+    fetchPage()
+      .then((content) => {
         if (cancelled) return;
-        setNotificaciones(page.content.filter((notificacion) => notificacion.usuario.email === currentUser?.email));
+
+        setNotificaciones(content);
         setError(null);
       })
-      .catch((loadError) => {
+      .catch((loadError: unknown) => {
         if (!cancelled) {
           setError(getErrorMessage(loadError));
         }
@@ -101,7 +102,34 @@ export function NotificationWorkspace() {
         window.clearTimeout(noticeTimer.current);
       }
     };
-  }, []);
+  }, [fetchPage]);
+
+  const notificacionesVisibles = useMemo(() => {
+    const targetEmail = (usuario?.email ?? sessionEmail)?.toLowerCase() ?? null;
+
+    if (!usuario && !targetEmail) return [];
+
+    return notificaciones.filter((notificacion) => {
+      if (usuario && notificacion.usuario?.id === usuario.id) {
+        return true;
+      }
+
+      return (
+        targetEmail !== null &&
+        notificacion.usuario?.email?.toLowerCase() === targetEmail
+      );
+    });
+  }, [notificaciones, usuario, sessionEmail]);
+
+  const sessionError =
+    sessionReady && !usuario && !sessionEmail
+      ? "No se pudo identificar al usuario de la sesión. Vuelve a iniciar sesión."
+      : null;
+
+  const displayError = error ?? sessionError;
+  // El correo del JWT basta para filtrar; no se bloquea la vista esperando
+  // el perfil completo si la consulta de usuarios tarda.
+  const pageLoading = loading || (!sessionReady && !sessionEmail);
 
   async function handleMarkRead(notificacion: Notificacion) {
     setMarkingId(notificacion.id);
@@ -121,7 +149,9 @@ export function NotificationWorkspace() {
   }
 
   async function handleMarkAllRead() {
-    const unread = notificaciones.filter((notificacion) => !notificacion.leida);
+    const unread = notificacionesVisibles.filter(
+      (notificacion) => !notificacion.leida,
+    );
 
     if (!unread.length) return;
 
@@ -176,7 +206,7 @@ export function NotificationWorkspace() {
     }
   }
 
-  const noLeidas = notificaciones.filter(
+  const noLeidas = notificacionesVisibles.filter(
     (notificacion) => !notificacion.leida,
   ).length;
 
@@ -193,18 +223,18 @@ export function NotificationWorkspace() {
               <span
                 className={cn(
                   "h-2 w-2 rounded-full bg-primary-container",
-                  loading && "animate-pulse",
+                  pageLoading && "animate-pulse",
                 )}
               />
               <span className="font-label-mono-xs text-label-mono-xs text-secondary">
-                {loading ? "Sincronizando..." : "Bandeja sincronizada"}
+                {pageLoading ? "Sincronizando..." : "Bandeja sincronizada"}
               </span>
             </div>
 
             <Button
               variant="secondary"
               onClick={() => void handleMarkAllRead()}
-              disabled={loading || markingAll || noLeidas === 0}
+              disabled={pageLoading || markingAll || noLeidas === 0}
             >
               <Icon
                 name={markingAll ? "progress_activity" : "done_all"}
@@ -218,11 +248,11 @@ export function NotificationWorkspace() {
             <Button
               variant="secondary"
               onClick={() => void load()}
-              disabled={loading}
+              disabled={pageLoading}
             >
               <Icon
-                name={loading ? "progress_activity" : "refresh"}
-                className={cn("text-[17px]", loading && "animate-spin")}
+                name={pageLoading ? "progress_activity" : "refresh"}
+                className={cn("text-[17px]", pageLoading && "animate-spin")}
               />
               <span>Actualizar</span>
             </Button>
@@ -248,7 +278,7 @@ export function NotificationWorkspace() {
         </div>
       ) : null}
 
-      {error ? (
+      {displayError ? (
         <Card className="mb-4 flex flex-col gap-3 border border-error-container p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-2 text-on-error-container">
             <Icon name="error" className="mt-0.5 text-[18px]" filled />
@@ -256,17 +286,19 @@ export function NotificationWorkspace() {
               <span className="font-title-md text-body-sm">
                 No se pudieron cargar las notificaciones
               </span>
-              <span className="font-body-sm text-body-sm">{error}</span>
+              <span className="font-body-sm text-body-sm">{displayError}</span>
             </div>
           </div>
-          <Button variant="secondary" onClick={() => void load()}>
-            <Icon name="refresh" className="text-[17px]" />
-            <span>Reintentar</span>
-          </Button>
+          {error ? (
+            <Button variant="secondary" onClick={() => void load()}>
+              <Icon name="refresh" className="text-[17px]" />
+              <span>Reintentar</span>
+            </Button>
+          ) : null}
         </Card>
       ) : null}
 
-      {loading ? (
+      {pageLoading ? (
         <Card className="flex min-h-[280px] flex-col items-center justify-center gap-3 p-8">
           <Icon
             name="progress_activity"
@@ -278,9 +310,9 @@ export function NotificationWorkspace() {
         </Card>
       ) : (
         <>
-          <NotificationStats notificaciones={notificaciones} />
+          <NotificationStats notificaciones={notificacionesVisibles} />
           <NotificationList
-            notificaciones={notificaciones}
+            notificaciones={notificacionesVisibles}
             markingId={markingId}
             onMarkRead={(notificacion) => void handleMarkRead(notificacion)}
             onDelete={setDeleting}

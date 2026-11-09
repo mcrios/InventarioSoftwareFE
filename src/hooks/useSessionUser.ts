@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getAccessPathsFromUsuario } from "@/lib/access";
 import {
   getCurrentUserSnapshot,
+  getSessionEmail,
   resolveCurrentUser,
   subscribeToCurrentUser,
 } from "@/lib/session";
@@ -16,9 +17,12 @@ export interface SessionUser {
   fullName: string;
   initials: string;
   role: string;
+  /** Correo del usuario; usa el claim del JWT si el perfil aún no cargó. */
   email: string | null;
   /** Rutas de los accesos que otorgan los roles del usuario. */
   accessPaths: string[];
+  /** `true` cuando ya se intentó resolver la sesión (con o sin éxito). */
+  ready: boolean;
 }
 
 function getInitials(nombre: string) {
@@ -46,18 +50,22 @@ function getShortName(nombre: string) {
  * Expone el usuario de la sesión cacheado al iniciar sesión.
  *
  * Lee primero `localStorage` (sin llamar a la API) y solo resuelve el usuario
- * contra el backend si todavía no existe en la caché.
+ * contra el backend si todavía no existe en la caché. Mientras el perfil no
+ * esté disponible, `email` cae al claim del JWT para no perder la identidad.
  */
 export function useSessionUser(): SessionUser {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     function sync() {
-      if (active) {
-        setUsuario(getCurrentUserSnapshot());
-      }
+      if (!active) return;
+
+      setUsuario(getCurrentUserSnapshot());
+      setSessionEmail(getSessionEmail());
     }
 
     sync();
@@ -66,12 +74,21 @@ export function useSessionUser(): SessionUser {
 
     resolveCurrentUser()
       .then((resolved) => {
-        if (active) {
-          setUsuario(resolved);
+        if (!active) return;
+
+        setUsuario(resolved);
+
+        if (resolved?.email) {
+          setSessionEmail(resolved.email);
         }
       })
       .catch(() => {
         // Si la consulta falla se conserva lo que haya en la caché.
+      })
+      .finally(() => {
+        if (active) {
+          setReady(true);
+        }
       });
 
     return () => {
@@ -83,6 +100,7 @@ export function useSessionUser(): SessionUser {
   return useMemo(() => {
     const nombre = usuario?.nombre?.trim() ?? "";
     const role = usuario?.roles?.[0]?.nombre?.trim() || "Sesión";
+    const email = usuario?.email ?? sessionEmail ?? null;
 
     return {
       usuario,
@@ -90,8 +108,9 @@ export function useSessionUser(): SessionUser {
       fullName: nombre || "Cuenta",
       initials: nombre ? getInitials(nombre) : "US",
       role,
-      email: usuario?.email ?? null,
+      email,
       accessPaths: getAccessPathsFromUsuario(usuario),
+      ready,
     };
-  }, [usuario]);
+  }, [usuario, sessionEmail, ready]);
 }
