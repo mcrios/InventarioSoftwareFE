@@ -155,6 +155,7 @@ export function LicenseTable({
           <table className="w-full text-left">
             <thead>
               <tr className="bg-surface-container font-label-mono-xs text-label-mono-xs uppercase tracking-wider text-secondary">
+                <th className="px-4 py-3 font-semibold">Producto</th>
                 <th className="px-4 py-3 font-semibold">Clave / Licencia</th>
                 <th className="px-4 py-3 font-semibold">Empresa</th>
                 <th className="px-4 py-3 font-semibold">Cantidad de instalaciones</th>

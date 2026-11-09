@@ -141,6 +141,7 @@ export interface TipoSoftware {
 export interface Licencia {
   id: number;
   empresa: Empresa;
+  producto: string;
   codigoClave: string | null;
   archivoUrl: string | null;
   cantidadTotal: number;
@@ -288,6 +289,7 @@ export type AccesoInput = Omit<Acceso, "id">;
 
 export interface LicenciaInput {
   empresa: EntityRef;
+  producto?: string | null;
   codigoClave?: string | null;
   archivoUrl?: string | null;
   cantidadTotal: number;

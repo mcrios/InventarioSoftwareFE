@@ -73,7 +73,7 @@ export function SoftwareFormModal({
   const licenciaOptions = useMemo(() => {
     const options = licencias.map((licencia) => ({
       value: String(licencia.id),
-      label: `Licencia #${licencia.id} · ${licencia.empresa.nombre}`,
+      label: `Licencia ${licencia.producto} · ${licencia.empresa.nombre}`,
       description: `${licencia.cantidadUsada}/${licencia.cantidadTotal} asientos${
         licencia.fechaVencimiento
           ? ` · vence ${licencia.fechaVencimiento}`

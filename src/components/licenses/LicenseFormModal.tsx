@@ -18,6 +18,7 @@ interface LicenseFormModalProps {
 
 interface FormState {
   empresaId: string;
+  producto: string;
   codigoClave: string;
   cantidadTotal: number;
   cantidadUsada: number;
@@ -33,6 +34,7 @@ function getInitialForm(
   if (initialData) {
     return {
       empresaId: String(initialData.empresa?.id ?? ""),
+      producto: initialData.producto ?? "",
       codigoClave: initialData.codigoClave ?? "",
       cantidadTotal: initialData.cantidadTotal ?? 1,
       cantidadUsada: initialData.cantidadUsada ?? 0,
@@ -43,6 +45,7 @@ function getInitialForm(
   }
   return {
     empresaId: empresas.length > 0 ? String(empresas[0].id) : "",
+    producto: "",
     codigoClave: "",
     cantidadTotal: 1,
     cantidadUsada: 0,
@@ -101,6 +104,7 @@ export function LicenseFormModal({
     try {
       await onSubmit({
         empresa: { id: parseInt(form.empresaId, 10) },
+        producto: form.producto.trim() || null,
         codigoClave: form.codigoClave.trim() || null,
         cantidadTotal: Number(form.cantidadTotal),
         cantidadUsada: isEditing ? Number(form.cantidadUsada) : 0,
@@ -169,6 +173,18 @@ export function LicenseFormModal({
         </div>
 
         {/* Código o Clave de Activación */}
+        <Input
+          id="producto"
+          label="Producto"
+          type="text"
+          value={form.producto}
+          onChange={(event) =>
+            setForm((prev) => ({ ...prev, producto: event.target.value }))
+          }
+          placeholder="Ej: Windows 11, Photoshop"
+          hint="Nombre del producto que activa la licencia."
+        />
+
         <Input
           id="license-key"
           label="Clave / Código de activación"

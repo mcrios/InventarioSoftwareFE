@@ -35,6 +35,12 @@ export function LicenseRow({
 
   return (
     <tr className="border-b border-outline-variant/30 transition-colors hover:bg-surface-container-low/50">
+      <td className="px-4 py-3.5 align-middle">
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-container px-2.5 py-1 font-title-sm text-body-sm text-on-surface">
+          <Icon name="deployed_code" className="text-[16px] text-secondary" />
+          {licencia.producto}
+        </span>
+      </td>
       {/* Clave / Código */}
       <td className="px-4 py-3.5 align-middle">
         <div className="flex flex-col gap-1">
